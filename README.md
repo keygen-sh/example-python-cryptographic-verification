@@ -1,6 +1,6 @@
 # Example Python Cryptographic Verification
 This is an example of cryptographically verifying a license key's authenticity,
-and extract embedded tamper-proof data within the key for offline use, all by
+and extracting embedded tamper-proof data within the key for offline use, all by
 using your Keygen account's public key. You can find your public key within
 [your account's settings page](https://app.keygen.sh/settings).
 
