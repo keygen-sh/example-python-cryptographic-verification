@@ -19,13 +19,20 @@ class Color():
   def green(x):
     return '\033[32m%s\033[0m' % x
 
+  @staticmethod
+  def gray(x):
+    return '\033[34m%s\033[0m' % x
+
 # Cryptographically verify license key using the provided scheme and public key
 def verify_license_key(license_scheme, license_key):
-  assert license_scheme in ('RSA_2048_PKCS1_SIGN', 'RSA_2048_PKCS1_PSS_SIGN'), 'scheme %s not supported or is missing' % license_scheme
+  assert license_scheme in ('RSA_2048_PKCS1_SIGN_V2', 'RSA_2048_PKCS1_PSS_SIGN_V2'), 'scheme %s not supported or is missing' % license_scheme
   assert license_key, 'license key is missing'
 
   # Split license key to obtain key and signature, then decode base64url encoded values
-  enc_key, enc_sig = license_key.split(".")
+  signing_data, enc_sig = license_key.split(".")
+  prefix, enc_key = signing_data.split("/")
+  assert prefix == 'key', 'license key prefix %s is invalid' % prefix
+
   key = base64.urlsafe_b64decode(enc_key)
   sig = base64.urlsafe_b64decode(enc_sig)
 
@@ -36,7 +43,7 @@ def verify_license_key(license_scheme, license_key):
   )
 
   # Choose the correct padding based on the chosen scheme
-  if license_scheme == 'RSA_2048_PKCS1_PSS_SIGN':
+  if license_scheme == 'RSA_2048_PKCS1_PSS_SIGN_V2':
     pad = padding.PSS(
       mgf=padding.MGF1(hashes.SHA256()),
       salt_length=padding.PSS.MAX_LENGTH
@@ -48,10 +55,12 @@ def verify_license_key(license_scheme, license_key):
   try:
     pub_key.verify(
       sig,
-      key,
+      "%s/%s" % (prefix, enc_key),
       pad,
       hashes.SHA256()
     )
+
+    print('%s License key contents: %s' % (Color.gray('[INFO]'), key))
 
     return True
   except (InvalidSignature, TypeError):
