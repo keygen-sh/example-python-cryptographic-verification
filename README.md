@@ -37,7 +37,7 @@ pip install -r requirements.txt
 Then run the script, passing in the `scheme` and `key` as arguments:
 
 ```bash
-python main.py "{LICENSE_SCHEME}" "{SIGNED_LICENSE_KEY}"
+python main.py "RSA_2048_PKCS1_PSS_SIGN_V2" "key/{SIGNED_LICENSE_KEY}"
 ```
 
 The license key's authenticity will be verified using RSA-SHA256 with the given

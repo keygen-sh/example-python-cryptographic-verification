@@ -38,7 +38,7 @@ def verify_license_key(license_scheme, license_key):
 
   # Load the PEM formatted public key from the environment
   pub_key = serialization.load_pem_public_key(
-    bytes(os.environ['KEYGEN_PUBLIC_KEY']),
+    os.environ['KEYGEN_PUBLIC_KEY'].encode(),
     backend=default_backend()
   )
 
@@ -55,7 +55,7 @@ def verify_license_key(license_scheme, license_key):
   try:
     pub_key.verify(
       sig,
-      "%s/%s" % (prefix, enc_key),
+      ("key/%s" % enc_key).encode(),
       pad,
       hashes.SHA256()
     )
@@ -66,18 +66,17 @@ def verify_license_key(license_scheme, license_key):
   except (InvalidSignature, TypeError):
     return False
 
-arg_names = ['program', 'license_scheme' ,'license_key']
-args = map(None, arg_names, sys.argv)
-args = { k: v for (k, v) in args }
-
 try:
-  ok = verify_license_key(args['license_scheme'], args['license_key'])
+  ok = verify_license_key(
+    sys.argv[1],
+    sys.argv[2]
+  )
 except AssertionError as e:
-  print('%s %s' % (Color.red('[ERROR]'), e.message))
+  print('%s %s' % (Color.red('[ERROR]'), e))
 
   sys.exit(1)
 except Exception as e:
-  print('%s cryptography: %s' % (Color.red('[ERROR]'), e.message))
+  print('%s cryptography: %s' % (Color.red('[ERROR]'), e))
 
   sys.exit(1)
 
